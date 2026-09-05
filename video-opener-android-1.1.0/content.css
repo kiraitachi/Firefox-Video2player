@@ -1,0 +1,264 @@
+/**
+ * Video Opener for Android – Overlay Styles
+ * Firefox for Android color palette:
+ *   --firefox-purple:  #592ACB  (primary brand)
+ *   --firefox-blue:    #0060DF  (action blue)
+ *   --firefox-ink:     #20123A  (dark surface)
+ *   --firefox-white:   #FFFFFF
+ *   --firefox-fog:     #F0F0F4  (light surface)
+ *   --firefox-violet:  #7542E5  (accent)
+ */
+
+/* ── Base overlay button ────────────────────────────────────────────────── */
+.voa-overlay {
+  position: absolute;
+  z-index: 2147483647;        /* max z-index */
+  pointer-events: auto;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+
+  /* Size */
+  width: auto;
+  min-width: 52px;
+  height: 40px;
+
+  /* Firefox-native look: pill shape, brand purple/blue gradient */
+  background: linear-gradient(135deg, #592ACB 0%, #0060DF 100%);
+  border-radius: 20px;
+  box-shadow:
+    0 2px 8px rgba(89, 42, 203, 0.45),
+    0 1px 2px rgba(0, 0, 0, 0.30);
+
+  border: 1.5px solid rgba(255, 255, 255, 0.18);
+
+  /* Entrance animation – slide up from below */
+  animation: voa-slide-in 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+
+  /* Overflow for ripple */
+  overflow: hidden;
+
+  /* Never disappear unless page removes it */
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: block !important;
+}
+
+@keyframes voa-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ── Inner layout ────────────────────────────────────────────────────────── */
+.voa-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 14px;
+  height: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Icon ────────────────────────────────────────────────────────────────── */
+.voa-icon {
+  width: 20px;
+  height: 20px;
+  color: #ffffff;
+  flex-shrink: 0;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.25));
+}
+
+/* ── Label ───────────────────────────────────────────────────────────────── */
+.voa-label {
+  font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #ffffff;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.20);
+}
+
+/* ── Touch / Active states ───────────────────────────────────────────────── */
+.voa-overlay:active,
+.voa-overlay:focus {
+  transform: scale(0.94);
+  box-shadow:
+    0 1px 4px rgba(89, 42, 203, 0.55),
+    0 0px 1px rgba(0, 0, 0, 0.25);
+  outline: none;
+}
+
+.voa-overlay:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
+
+/* ── Ripple ──────────────────────────────────────────────────────────────── */
+.voa-ripple {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.voa-ripple::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: rgba(255, 255, 255, 0);
+  transition: background 0.15s ease;
+}
+
+.voa-ripple-active::after {
+  background: rgba(255, 255, 255, 0.22);
+  animation: voa-ripple-pulse 0.35s ease-out forwards;
+}
+
+@keyframes voa-ripple-pulse {
+  0%   { background: rgba(255,255,255,0.30); }
+  100% { background: rgba(255,255,255,0); }
+}
+
+/* ── Dark-mode adaptation ────────────────────────────────────────────────── */
+@media (prefers-color-scheme: dark) {
+  .voa-overlay {
+    background: linear-gradient(135deg, #7542E5 0%, #0090ED 100%);
+    box-shadow:
+      0 2px 12px rgba(117, 66, 229, 0.50),
+      0 1px 3px rgba(0, 0, 0, 0.40);
+    border-color: rgba(255, 255, 255, 0.12);
+  }
+}
+
+/* ── Fallback dialog ─────────────────────────────────────────────────────── */
+#voa-fallback-dialog {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  animation: voa-dialog-in 0.22s ease both;
+}
+
+@keyframes voa-dialog-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.voa-dialog-box {
+  background: #1C1B1F;
+  border-radius: 20px 20px 12px 12px;
+  padding: 20px 16px 24px;
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  animation: voa-sheet-up 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+  box-shadow: 0 -4px 32px rgba(0,0,0,0.50);
+}
+
+@keyframes voa-sheet-up {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+.voa-dialog-title {
+  font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: #F0F0F4;
+  text-align: center;
+  margin-bottom: 4px;
+  letter-spacing: 0.01em;
+}
+
+.voa-dialog-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: #2B2A33;
+  border-radius: 12px;
+  color: #F0F0F4;
+  text-decoration: none;
+  font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  border: 1px solid rgba(255,255,255,0.08);
+  transition: background 0.15s;
+  cursor: pointer;
+}
+
+.voa-dialog-btn:active {
+  background: #3A3944;
+}
+
+.voa-dialog-btn svg {
+  width: 24px;
+  height: 24px;
+  color: #7542E5;
+  flex-shrink: 0;
+}
+
+.voa-dialog-copy {
+  padding: 13px 16px;
+  background: rgba(117, 66, 229, 0.15);
+  border: 1px solid rgba(117, 66, 229, 0.35);
+  border-radius: 12px;
+  color: #9E80FF;
+  font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.15s;
+}
+
+.voa-dialog-copy:active {
+  background: rgba(117, 66, 229, 0.28);
+}
+
+.voa-dialog-close {
+  padding: 13px 16px;
+  background: transparent;
+  border: none;
+  border-radius: 12px;
+  color: #9090A0;
+  font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: center;
+}
+
+.voa-dialog-close:active {
+  background: rgba(255,255,255,0.06);
+}
+
+/* ── Blob-stream warning (shown when the real URL can't be recovered) ──── */
+.voa-dialog-warn {
+  font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: #CFCFD8;
+  background: rgba(255, 106, 117, 0.10);
+  border: 1px solid rgba(255, 106, 117, 0.30);
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-bottom: 2px;
+}
