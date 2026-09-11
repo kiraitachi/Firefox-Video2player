@@ -1,4 +1,4 @@
-# Video Opener for Android
+# Video2Player for Android
 
 ![Extension icon](https://addons.mozilla.org/user-media/addon_icons/3006/3006699-64.png?modified=3c54f730)
 
