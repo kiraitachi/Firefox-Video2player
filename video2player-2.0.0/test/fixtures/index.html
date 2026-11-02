@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Video2Player — test fixture</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 16px;
+        background: #101014;
+        color: #e8e8ef;
+        font:
+          15px/1.5 system-ui,
+          sans-serif;
+      }
+      h1 {
+        font-size: 18px;
+      }
+      section {
+        margin-bottom: 32px;
+      }
+      video {
+        width: 100%;
+        max-width: 900px;
+        background: #000;
+        display: block;
+      }
+      .decoy {
+        max-width: 160px;
+      }
+      iframe {
+        width: 100%;
+        max-width: 900px;
+        height: 320px;
+        border: 1px solid #333;
+      }
+      p {
+        color: #9a9aa8;
+        max-width: 70ch;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Video2Player — test fixture</h1>
+
+    <section>
+      <h2>Primary video (2.35:1, with subtitle track)</h2>
+      <p>
+        Letterboxed on a phone screen, so pinch-to-zoom has real black bars to
+        crop. Burned-in timecode makes seeking accuracy visible.
+      </p>
+      <video controls preload="metadata" poster="">
+        <source src="sample.mp4" type="video/mp4" />
+        <track
+          label="English"
+          kind="subtitles"
+          srclang="en"
+          src="sample.vtt"
+          default
+        />
+      </video>
+    </section>
+
+    <section>
+      <h2>Decoy video (too small to take over)</h2>
+      <p>Detection must ignore this one and pick the primary video above.</p>
+      <video class="decoy" controls preload="none" muted>
+        <source src="sample.mp4" type="video/mp4" />
+      </video>
+    </section>
+
+    <section>
+      <h2>Same-origin iframe player</h2>
+      <p>Exercises the <code>all_frames</code> content script path.</p>
+      <iframe
+        src="embed.html"
+        allow="fullscreen"
+        title="Embedded player"
+      ></iframe>
+    </section>
+
+    <section>
+      <h2>Multiple sources (quality switching)</h2>
+      <p>
+        Two <code>&lt;source&gt;</code> elements, so the quality menu has
+        something real to switch between.
+      </p>
+      <video controls preload="none">
+        <source src="sample.mp4" type="video/mp4" data-label="1280×544" />
+        <source src="sample.mp4" type="video/mp4" data-label="640×272" />
+      </video>
+    </section>
+  </body>
+</html>

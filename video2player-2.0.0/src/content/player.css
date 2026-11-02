@@ -1,0 +1,1031 @@
+:host {
+  all: initial;
+  position: fixed;
+  inset: 0;
+  display: block;
+  pointer-events: none;
+  font:
+    500 15px/1.3 system-ui,
+    sans-serif;
+  color: #f4f1ff;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  user-select: none;
+
+  /* One curve for everything that moves: slow to leave, quick to arrive, the
+     way a sheet slides on a phone. */
+  --ease: cubic-bezier(0.32, 0.72, 0, 1);
+  --chrome-fade: 280ms;
+  --glass: rgba(20, 19, 26, 0.62);
+  --shadow-soft: 0 10px 34px rgba(0, 0, 0, 0.42);
+  --shadow-deep: 0 18px 52px rgba(0, 0, 0, 0.55);
+  --icon-shadow: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.65));
+
+  /* The seek bar and everything that lines up with it stay clear of the
+     strip along the bottom where the Android home swipe lives. */
+  --seek-lift: 12%;
+}
+
+.layer {
+  position: absolute;
+  inset: 0;
+}
+
+/* Night light: multiply keeps the warm tint off the controls above it. */
+.warm {
+  background: #ff8a1e;
+  mix-blend-mode: multiply;
+  opacity: 0;
+  transition: opacity 300ms ease;
+}
+
+.dim {
+  background: #000;
+  opacity: 0;
+  transition: opacity 200ms ease;
+}
+
+/* Depth under the controls rather than a flat wash: the film keeps playing
+   underneath, and the buttons still have to be legible over a white scene. */
+.scrim {
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.72) 0%,
+      rgba(0, 0, 0, 0.34) 14%,
+      rgba(0, 0, 0, 0) 38%
+    ),
+    linear-gradient(
+      to top,
+      rgba(0, 0, 0, 0.82) 0%,
+      rgba(0, 0, 0, 0.42) 20%,
+      rgba(0, 0, 0, 0) 50%
+    ),
+    linear-gradient(rgba(0, 0, 0, 0.28), rgba(0, 0, 0, 0.28));
+  pointer-events: none;
+}
+
+.chrome {
+  opacity: 1;
+  transition: opacity var(--chrome-fade) var(--ease);
+}
+
+.chrome[hidden] {
+  display: block;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Each band leaves in the direction it came from, so bringing the controls
+   back reads as one movement instead of a flash. */
+.topbar,
+.seekbar,
+.centre-row {
+  transition: transform 340ms var(--ease);
+}
+
+.chrome[hidden] .topbar {
+  transform: translateY(-12px);
+}
+
+.chrome[hidden] .seekbar {
+  transform: translateY(16px);
+}
+
+.chrome[hidden] .centre-row {
+  transform: translate(-50%, -50%) scale(0.94);
+}
+
+.topbar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 0;
+  padding-left: max(30px, env(safe-area-inset-left));
+  padding-right: max(30px, env(safe-area-inset-right));
+  pointer-events: auto;
+}
+
+/* The playlist sits next to the way out, where a thumb reaches it with the
+   phone held sideways: one quiet button that names where in the series the
+   film is, the way the site itself reads it — the season, then the episode. */
+.playlist-button {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  max-width: 38vw;
+  height: 32px;
+  padding: 0 8px 0 12px;
+  border: 0;
+  border-radius: 9px;
+  background: rgba(118, 118, 128, 0.32);
+  color: #fff;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background 200ms var(--ease),
+    transform 200ms var(--ease);
+}
+
+.playlist-button.is-empty {
+  display: none;
+}
+
+.playlist-button:active {
+  transform: scale(0.95);
+}
+
+.playlist-button[aria-pressed='true'] {
+  background: #636366;
+}
+
+.playlist-button svg {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  fill: none;
+  stroke: rgba(235, 235, 245, 0.6);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 260ms var(--ease);
+}
+
+.playlist-button[aria-pressed='true'] svg {
+  transform: rotate(180deg);
+}
+
+.playlist-current {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.button {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #fff;
+  cursor: pointer;
+  transition: transform 220ms var(--ease);
+}
+
+.button:active {
+  transform: scale(0.88);
+}
+
+.button[aria-pressed='true'] {
+  opacity: 1;
+  color: #ffd8a8;
+}
+
+.button svg {
+  width: 22px;
+  height: 22px;
+  display: block;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: var(--icon-shadow);
+}
+
+/* Out of fullscreen there is a way back to it; in the small box the site gave
+   the video, the sheets and the way out step aside to make room. */
+.chrome:not([data-windowed]) .is-windowed-only,
+.chrome[data-compact] .is-full-only {
+  display: none;
+}
+
+.chrome[data-compact] .topbar {
+  padding: 6px 8px;
+}
+
+.surface {
+  position: absolute;
+  inset: 0;
+  pointer-events: auto;
+  touch-action: none;
+}
+
+.seekbar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: var(--seek-lift);
+  padding: 0 max(30px, env(safe-area-inset-right)) 0
+    max(30px, env(safe-area-inset-left));
+  pointer-events: none;
+}
+
+.seek-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.time {
+  min-width: 58px;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
+}
+
+.time:last-child {
+  text-align: right;
+}
+
+.seek-track {
+  position: relative;
+  flex: 1;
+  height: 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.26);
+  box-shadow:
+    0 2px 10px rgba(0, 0, 0, 0.4),
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.18);
+  overflow: hidden;
+}
+
+/* The opening, once recognised, in a colour of its own: where it is and how
+   long it runs, at a glance, before deciding whether to sit through it. */
+.seek-zones {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.seek-zone {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: rgb(255 190 92 / 78%);
+}
+
+/* Chapter dividers sit inside the track, so the fill runs under them. */
+.seek-marks {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.seek-mark {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  margin-left: -1.5px;
+  background: rgba(10, 9, 14, 0.75);
+}
+
+/* The name of the section being played, above the bar and out of the way. */
+.chapter {
+  margin: 0 0 8px 58px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 0;
+  transition: opacity 220ms var(--ease);
+}
+
+.chapter.is-visible {
+  opacity: 0.92;
+}
+
+.seek-fill {
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  transform-origin: left center;
+  transform: scaleX(0);
+}
+
+.toast {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.92);
+  padding: 10px 18px;
+  border-radius: 16px;
+  background: var(--glass);
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(18px);
+  font-size: 16px;
+  font-variant-numeric: tabular-nums;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 200ms var(--ease),
+    transform 260ms var(--ease);
+}
+
+.toast.is-visible {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+/* Shown while a feed moves on to its next video. The picture has gone back to
+   the page by then, so without it the screen would be a black gap that looks
+   like the player has stalled. */
+.feed-loader {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 36px;
+  height: 36px;
+  margin: -18px 0 0 -18px;
+  border: 3px solid rgba(244, 241, 255, 0.22);
+  border-top-color: #f4f1ff;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: feed-spin 800ms linear infinite;
+}
+
+.feed-loader[hidden] {
+  display: none;
+}
+
+@keyframes feed-spin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+/* The side that was double-tapped lights up as a half-moon reaching in from
+   its edge. It sits under the controls and never takes a touch: the taps that
+   keep a run going have to reach the surface beneath it. */
+.skip-feedback {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 40%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: rgb(255 255 255 / 10%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 320ms var(--ease);
+}
+
+.skip-feedback.is-back {
+  left: 0;
+  border-radius: 0 50% 50% 0 / 0 50% 50% 0;
+}
+
+.skip-feedback.is-forward {
+  right: 0;
+  border-radius: 50% 0 0 50% / 50% 0 0 50%;
+}
+
+.skip-feedback.is-visible {
+  opacity: 1;
+  transition-duration: 120ms;
+}
+
+/* Fills the half-moon outwards from the finger, once per tap. */
+.skip-ripple {
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  margin: -40px 0 0 -40px;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 22%);
+  opacity: 0;
+  transform: scale(0);
+}
+
+.skip-ripple.is-rippling {
+  animation: skip-ripple 600ms var(--ease);
+}
+
+@keyframes skip-ripple {
+  from {
+    opacity: 1;
+    transform: scale(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(9);
+  }
+}
+
+.skip-content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-shadow: 0 1px 4px rgb(0 0 0 / 70%);
+}
+
+.skip-arrows {
+  display: flex;
+}
+
+/* Back runs right to left: the same arrows, turned round and lit in the
+   opposite order. */
+.is-back .skip-arrows {
+  flex-direction: row-reverse;
+}
+
+.is-back .skip-arrow {
+  transform: scaleX(-1);
+}
+
+.skip-arrow {
+  width: 18px;
+  height: 18px;
+  fill: #fff;
+  opacity: 0.3;
+  filter: var(--icon-shadow);
+}
+
+.is-visible .skip-arrow {
+  animation: skip-arrow 750ms linear infinite;
+}
+
+.is-visible .skip-arrow:nth-child(2) {
+  animation-delay: 150ms;
+}
+
+.is-visible .skip-arrow:nth-child(3) {
+  animation-delay: 300ms;
+}
+
+@keyframes skip-arrow {
+  0%,
+  60%,
+  100% {
+    opacity: 0.3;
+  }
+  25% {
+    opacity: 1;
+  }
+}
+
+.skip-label {
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Sits above the right end of the seek bar, where a thumb already is with
+   the phone on its side, and stays up with or without the controls. */
+.intro-skip {
+  position: absolute;
+  right: max(30px, env(safe-area-inset-right));
+  bottom: calc(var(--seek-lift) + 64px);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 11px 14px 11px 18px;
+  border: 0;
+  border-radius: 14px;
+  background: rgb(20 19 26 / 72%);
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(18px);
+  color: #fff;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(10px);
+  transition:
+    opacity 220ms var(--ease),
+    transform 280ms var(--ease);
+}
+
+.intro-skip.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: none;
+}
+
+.intro-skip:active {
+  transform: scale(0.95);
+}
+
+.intro-skip svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Kept clear of the volume strip that runs down the right edge. */
+/* The dark material of the iOS sheets before Liquid Glass: a deep, slightly
+   see-through grey with a heavy blur and the colour behind pushed up through
+   it, a hairline rim to lift it off a dark scene, and a soft shadow. */
+.panel {
+  position: absolute;
+  top: 60px;
+  right: max(30px, env(safe-area-inset-right));
+  width: min(330px, 50vw);
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(30, 30, 32, 0.72);
+  box-shadow:
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.12),
+    0 16px 48px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(30px) saturate(180%);
+  display: none;
+  flex-direction: column;
+  gap: 6px;
+  pointer-events: auto;
+  transform-origin: top right;
+}
+
+.panel.is-open {
+  display: flex;
+  animation: panel-in 260ms var(--ease);
+}
+
+@keyframes panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.step-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.step-label {
+  flex: 1;
+  font-size: 13px;
+}
+
+.step-value {
+  flex: none;
+  width: 52px;
+  text-align: center;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.step-button {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.12);
+  color: inherit;
+  font: inherit;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background 160ms var(--ease),
+    transform 200ms var(--ease);
+}
+
+.step-button:active {
+  background: rgba(236, 236, 242, 0.9);
+  color: #16151c;
+  transform: scale(0.94);
+}
+
+.step-button:disabled {
+  opacity: 0.3;
+}
+
+.step-reset {
+  align-self: flex-end;
+  margin-top: 2px;
+  padding: 8px 14px;
+  border: 0;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.14);
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+}
+
+/* Anchored under the button that opens it, not stretched across the film —
+   and narrow, a column of sections rather than a sheet of labels and chips. */
+.menu {
+  right: max(30px, env(safe-area-inset-right));
+  left: auto;
+  width: min(340px, 54vw);
+  padding: 12px 12px 14px;
+  /* Ends where the seek bar begins: the sheet is anchored 60px down and the
+   * bar rides 12vh off the bottom, so the two can never meet. Viewport units
+   * rather than percentages — the sheet's parent is a stretched box with no
+   * height of its own, against which a percentage means nothing. */
+  max-height: calc(100vh - 96px - 18vh);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  gap: 14px;
+}
+
+/* A section is as tall as its segments, however many lines they take: the
+ * quality ladder runs to nine rungs and wraps. */
+.menu-row {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.menu-row.is-empty {
+  display: none;
+}
+
+/* The grouped-list heading: small, spaced capitals in the secondary grey. */
+.menu-label {
+  padding-left: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(235, 235, 245, 0.6);
+}
+
+.menu-note {
+  padding: 6px 8px;
+  font-size: 13px;
+  color: rgba(235, 235, 245, 0.6);
+}
+
+/* A segmented control: one sunken track, the chosen segment raised out of it.
+   Segments share a line and grow to fill it, so a short ladder reads as one
+   control and a long one wraps without leaving a ragged edge. */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 9px;
+  background: rgba(118, 118, 128, 0.24);
+}
+
+.chip {
+  flex: 1 0 auto;
+  min-width: 48px;
+  height: 32px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: #fff;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background 200ms var(--ease),
+    box-shadow 200ms var(--ease),
+    transform 200ms var(--ease);
+}
+
+.chip:active {
+  transform: scale(0.95);
+}
+
+.chip[aria-pressed='true'] {
+  background: #636366;
+  font-weight: 600;
+  box-shadow:
+    0 3px 8px rgba(0, 0, 0, 0.18),
+    0 3px 1px rgba(0, 0, 0, 0.06);
+}
+
+/* Inset grouped cells for the things that are actions or switches rather than
+   one choice out of many. */
+.menu-cells {
+  margin-top: 3px;
+  border-radius: 10px;
+  background: rgba(118, 118, 128, 0.18);
+  overflow: hidden;
+}
+
+.menu-cell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 44px;
+  padding: 0 12px 0 14px;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  font: inherit;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+  transition: background 160ms var(--ease);
+}
+
+/* The separator starts where the text does, as it does in an iOS list. */
+.menu-cell + .menu-cell::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 14px;
+  right: 0;
+  height: 0.5px;
+  background: rgba(84, 84, 88, 0.65);
+}
+
+.menu-cell:active {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.menu-cell-label {
+  flex: 1;
+  min-width: 0;
+}
+
+.menu-cell-icon {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: rgba(235, 235, 245, 0.3);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* The sheet hangs under the button that opens it, on the side of the way
+   out, rather than under the settings gear across the screen. */
+.playlist-panel {
+  left: max(30px, env(safe-area-inset-left));
+  right: auto;
+  transform-origin: top left;
+}
+
+.menu-cell.is-current {
+  font-weight: 600;
+}
+
+/* The tick of an iOS list, in the same green as the switch. */
+.menu-cell-check {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: #34c759;
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* The iOS switch: a pill that turns green, a white knob that slides across. */
+.switch {
+  position: relative;
+  flex: none;
+  width: 51px;
+  height: 31px;
+  border-radius: 999px;
+  background: rgba(120, 120, 128, 0.32);
+  transition: background 220ms var(--ease);
+}
+
+.switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 27px;
+  height: 27px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow:
+    0 3px 8px rgba(0, 0, 0, 0.15),
+    0 3px 1px rgba(0, 0, 0, 0.06);
+  transition: transform 260ms var(--ease);
+}
+
+.menu-cell[aria-checked='true'] .switch {
+  background: #34c759;
+}
+
+.menu-cell[aria-checked='true'] .switch::after {
+  transform: translateX(20px);
+}
+
+.file-picker {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Cues sit above the seek bar and are set with textContent, never parsed. */
+.cue {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  bottom: calc(var(--seek-lift) + 46px);
+  text-align: center;
+  font-size: 20px;
+  line-height: 1.35;
+  white-space: pre-line;
+  text-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.95),
+    0 0 2px rgba(0, 0, 0, 0.9);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 180ms var(--ease);
+}
+
+.cue.is-visible {
+  opacity: 1;
+}
+
+/* A flex child of the centre row, so it lines up with the skip buttons. The
+   pause target is this button and nothing else — tapping the picture only
+   brings the controls up or puts them away. */
+.play-button {
+  width: 114px;
+  height: 114px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: #fff;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: transform 220ms var(--ease);
+}
+
+.play-button svg {
+  width: 63px;
+  height: 63px;
+  display: block;
+  fill: currentColor;
+  stroke: currentColor;
+  stroke-width: 2.4;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  filter: var(--icon-shadow);
+}
+
+.centre-row {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  gap: clamp(48px, 11vw, 128px);
+  pointer-events: none;
+}
+
+.centre-row > * {
+  pointer-events: auto;
+}
+
+/* Hidden controls must not swallow a tap meant for the picture underneath. */
+.chrome[hidden] .centre-row > *,
+.chrome[hidden] .topbar {
+  pointer-events: none;
+}
+
+.play-button:active {
+  transform: scale(0.92);
+}
+
+.skip-button:active {
+  transform: scale(0.9);
+}
+
+.skip-button {
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #fff;
+  cursor: pointer;
+  transition: transform 220ms var(--ease);
+}
+
+.seek-area {
+  --progress: 0%;
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+}
+
+/* The scrub time rides the tip of the line rather than sitting in the middle. */
+.seek-time {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  left: var(--progress);
+  transform: translateX(-50%) scale(0.94);
+  padding: 4px 10px;
+  border-radius: 10px;
+  background: rgba(20, 19, 26, 0.82);
+  box-shadow: var(--shadow-soft);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  opacity: 0;
+  transition:
+    opacity 160ms var(--ease),
+    transform 220ms var(--ease);
+  pointer-events: none;
+}
+
+.seekbar.is-scrubbing .seek-time {
+  opacity: 1;
+  transform: translateX(-50%) scale(1);
+}
+
+.skip-button svg {
+  width: 40px;
+  height: 40px;
+  display: block;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  filter: var(--icon-shadow);
+}
+
+.skip-button text {
+  font-family: inherit;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chrome,
+  .topbar,
+  .seekbar,
+  .centre-row,
+  .toast,
+  .cue,
+  .button,
+  .chip,
+  .playlist-button,
+  .step-button,
+  .play-button,
+  .skip-button,
+  .seek-time {
+    transition-duration: 1ms;
+  }
+
+  .skip-feedback,
+  .intro-skip {
+    transition-duration: 1ms;
+  }
+
+  .panel.is-open,
+  .feed-loader,
+  .skip-ripple.is-rippling,
+  .is-visible .skip-arrow {
+    animation: none;
+  }
+
+  .is-visible .skip-arrow {
+    opacity: 1;
+  }
+}

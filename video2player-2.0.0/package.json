@@ -1,0 +1,34 @@
+{
+  "name": "video2player",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Firefox extension (Android and desktop): detects videos on web pages and opens them in a built-in touch-first player.",
+  "license": "MPL-2.0",
+  "author": "kiraitachi",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kiraitachi/Firefox-Video2player.git"
+  },
+  "homepage": "https://github.com/kiraitachi/Firefox-Video2player",
+  "type": "module",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "build": "node esbuild.config.mjs",
+    "build:clean": "node esbuild.config.mjs --clean",
+    "package": "npm run build && web-ext build -s dist -a artifacts --overwrite-dest",
+    "start": "npm run build && web-ext run -s dist",
+    "start:android": "npm run build && web-ext run -s dist -t firefox-android --firefox-apk org.mozilla.firefox --firefox-apk-component .AppSolidDark",
+    "lint": "npm run lint:ext && npm run lint:privacy",
+    "lint:ext": "npm run build && web-ext lint -s dist",
+    "lint:privacy": "node tools/check-privacy.mjs",
+    "test": "node --test",
+    "fixture": "node tools/make-fixture.mjs",
+    "serve": "node tools/serve.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2",
+    "web-ext": "10.7.0"
+  }
+}

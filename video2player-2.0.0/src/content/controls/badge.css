@@ -1,0 +1,120 @@
+/* Video2Player pill: gradient capsule with the play-and-arrow mark.
+   It slides in once and then stays put for as long as the video is in view. */
+
+.badge {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 40px;
+  min-width: 52px;
+  margin: 0;
+  padding: 0 14px;
+  overflow: hidden;
+  border: 1.5px solid rgba(255, 255, 255, 0.18);
+  border-radius: 20px;
+  background: linear-gradient(135deg, #592acb 0%, #0060df 100%);
+  box-shadow:
+    0 2px 10px rgba(89, 42, 203, 0.5),
+    0 1px 3px rgba(0, 0, 0, 0.3);
+  color: #fff;
+  font:
+    600 13px/1 -apple-system,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease;
+}
+
+/* `backwards`, not `both`: a forwards fill would pin the end state and stop
+   the pressed (:active) scale from ever applying. */
+.badge.is-entering {
+  animation: slide-in 280ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+.badge:active {
+  transform: scale(0.94);
+  box-shadow: 0 1px 5px rgba(89, 42, 203, 0.6);
+}
+
+.badge:focus {
+  outline: none;
+}
+
+.badge:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .badge {
+    background: linear-gradient(135deg, #7542e5 0%, #0090ed 100%);
+    box-shadow:
+      0 2px 14px rgba(117, 66, 229, 0.55),
+      0 1px 4px rgba(0, 0, 0, 0.45);
+  }
+}
+
+.icon {
+  position: relative;
+  flex: none;
+  width: 20px;
+  height: 20px;
+  display: block;
+  fill: none;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.25));
+}
+
+.label {
+  position: relative;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.ripple {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: rgba(255, 255, 255, 0);
+  pointer-events: none;
+}
+
+.ripple.is-active {
+  animation: ripple 350ms ease-out forwards;
+}
+
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes ripple {
+  from {
+    background: rgba(255, 255, 255, 0.3);
+  }
+  to {
+    background: rgba(255, 255, 255, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .badge.is-entering,
+  .ripple.is-active {
+    animation: none;
+  }
+}

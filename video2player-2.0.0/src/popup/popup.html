@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Video2Player</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header class="header">
+      <img class="logo" src="icons/icon-96.png" alt="" width="32" height="32" />
+      <div>
+        <h1>Video2Player</h1>
+        <p class="tagline">No data leaves your device.</p>
+      </div>
+    </header>
+
+    <main>
+      <section class="card">
+        <label class="row" for="site-enabled">
+          <span class="row-label">
+            Enabled on this site
+            <small id="site-host" class="row-note">—</small>
+          </span>
+          <input id="site-enabled" type="checkbox" checked />
+        </label>
+      </section>
+
+      <section class="card" id="status-card">
+        <p class="status" id="status">Looking for a video…</p>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <a href="https://github.com/kiraitachi/Firefox-Video2player" target="_blank"
+        >Source code</a
+      >
+      <button type="button" id="reset">Reset settings</button>
+    </footer>
+
+    <script src="popup.js"></script>
+  </body>
+</html>
