@@ -2,62 +2,114 @@
 
 ![Extension icon](https://addons.mozilla.org/user-media/addon_icons/3006/3006699-64.png?modified=3c54f730)
 
-A Firefox extension (Android only) that detects video content on a web page
-and lets you open it directly in your default video player app — VLC, MX
-Player, or whichever app you've set as the system default for video files.
-
----
-
-## What it does
-
-- Scans the current page for `<video>` elements as they appear, including
-  ones added dynamically after the page loads (infinite-scroll feeds, SPA
-  navigation, players that attach late).
-- Overlays a small "Open in App" button beneath each detected video, styled
-  to match Firefox's own color palette so it feels like a native browser
-  feature rather than a third-party injection.
-- On tap, resolves the actual playable URL for that video and hands it to
-  Android via an intent, so the OS opens it in your default video player —
-  no extra app-picker step if you already have a default set.
-- If the direct URL can't be determined (see limitations below), falls back
-  to a small dialog offering explicit "Open with VLC" / "Open with MX
-  Player" buttons, or a "Copy Video URL" option so you can paste it into a
-  player manually.
-
-## Intent
-
-Many mobile browsers (Samsung Internet, for example) offer a built-in
-"open externally" button on video content. Firefox for Android does not.
-This extension exists to bring that same convenience to Firefox: a single
-tap to hand a video off to a dedicated player app, instead of watching it
-inside the browser's own video controls.
-
-It's built specifically for **Android** and is not intended to run, or be
-useful, on desktop Firefox — desktop already has other ways to save or open
-media, and Android's intent system is the mechanism this extension depends
-on entirely.
-
+[![License: MPL-2.0](https://img.shields.io/badge/license-MPL--2.0-blue.svg)](LICENSE)
+[![No data collected](https://img.shields.io/badge/data%20collected-none-brightgreen.svg)](#privacy)
+ 
+[![Extension icon](https://addons.mozilla.org/user-media/addon_icons/3006/3006699-64.png?modified=3c54f730)](https://addons.mozilla.org/en-US/firefox/addon/video-opener-for-android/)
+ 
+A Firefox extension for **Android and desktop** that detects videos on web
+pages and opens them in a **built-in, touch-first player**: thick seek bar,
+gesture controls, quality / audio / subtitle pickers, colour tuning and skip
+intro.
+ 
+Tap the **Open Player** pill under a video and that video takes over the
+screen with a proper player. It plays the page's own `<video>` element, so it
+works on anything the browser can play, including streams that external apps
+cannot open (`blob:` / MSE / HLS).
+ 
+> **Version 2.0 changes what the pill does.** Versions 1.x handed the video's
+> URL to an external app (VLC, MX Player…) through an Android intent. That
+> fails whenever a site streams through a `blob:` URL. From 2.0 the video plays
+> in the built-in player instead, so no URL ever has to be recovered. The 1.x
+> code is kept in [`video-opener-android-1.1.0/`](video-opener-android-1.1.0)
+> for reference.
+ 
+## The pill
+ 
+- Appears centred under the main video on the page (inside its bottom edge when
+  there is no room below), slides in once and **stays** while the video is in
+  view.
+- Tap it to open the player. Tap the ✕ in the player to go back; the video is
+  returned to the page exactly where it was.
+- Turn it off per site from the toolbar popup.
+## The player
+ 
+- **Seek bar**: thick, grab it anywhere; drag away from it to scrub slower.
+  Chapter marks are drawn when the site provides them.
+- **Double-tap / double-click** the right side for +10 s, the left for −10 s.
+  Keep tapping to go further.
+- **Hold** the right side for 2×, the left to rewind.
+- **Tap / click** shows or hides the controls. Only the play button pauses.
+- **Pinch** to fill the screen and crop black bars.
+- **Swipe** up or down through TikTok / Reels / Shorts style feeds.
+- **Follows the device**: portrait or landscape, turning mid-film included.
+- **Quality, audio track, speed, subtitles** (site tracks or your own `.srt` /
+  `.vtt`) in the settings sheet.
+- **Seasons and episodes** picker on sites that have one.
+- **Colour**: brightness, contrast, saturation and a warm night light; the
+  choice is remembered.
+- **Skip intro**: learns a series' opening by ear (on the device, nothing is
+  sent anywhere) and offers to skip it from the third episode.
+Desktop uses the same Pointer Events as touch, so a mouse behaves like a
+finger: click, double-click the sides to seek, press-and-hold, drag the seek
+bar. There are no keyboard shortcuts yet.
+ 
+## Privacy
+ 
+- Permissions: `storage` (your settings, on the device) and `activeTab`.
+- No `fetch`, no `XMLHttpRequest`, no remote URLs; `npm run lint:privacy`
+  enforces it.
+- Nothing is collected or sent. Works offline. The build is not minified.
+- It runs on all sites only to find the `<video>`.
 ## Limitations
-
-- **Streaming/blob URLs**: many sites (most tube sites, Twitch, YouTube,
-  Vimeo, and others) serve video through MediaSource Extensions or HLS,
-  which means the `<video>` element's actual `src` is a temporary `blob:`
-  reference that only exists inside that browser tab. External apps can't
-  open a `blob:` URL. The extension includes extraction logic for a few
-  known sites (currently xvideos.com) that expose a real direct URL
-  elsewhere on the page, plus a generic best-effort scan for other sites —
-  but this is not guaranteed to work everywhere, and sites can change their
-  player code at any time and break it.
-- **No forced player**: the extension intentionally does not pin video
-  playback to a specific app. It relies on whatever you've set as your
-  Android default handler for video files. If you have no default set,
-  Android may show its own app-chooser instead of opening silently.
-- **Requires a real device to verify**: intent handling, app defaults, and
-  player compatibility can only be confirmed on an actual Android device
-  with Firefox and a video player installed — this can't be simulated or
-  tested in a desktop environment.
-- **DRM-protected or heavily obfuscated players**: sites using encrypted
-  media extensions (EME) or aggressively obfuscated JavaScript will likely
-  not yield a usable direct URL at all.
-- **Not a downloader**: the extension only hands off a URL to another app
-  for playback; it does not fetch, store, or convert video files itself.
+ 
+- **Quality** works with `<source>` lists, YouTube, hls.js, dash.js, Shaka and
+  Playerjs. Elsewhere the row shows what is playing.
+- **Rewind** is stepped seeking; browsers cannot play backwards.
+- **Volume** stays on the device's buttons on Android; the web has no access.
+- **Saving a frame** is impossible on Firefox for Android.
+- **Skip intro** needs two episodes to learn an opening. It listens only to a
+  video the site serves itself; a film loaded from another domain is left
+  alone, since the browser would silence it.
+- **DRM-protected video** has not been tested.
+- **Ads:** it works best with an ad blocker. The pill attaches to whichever
+  video the page shows most prominently, which can be an ad.
+- Not yet verified on a wide range of real devices and sites. Please
+  [open an issue](https://github.com/kiraitachi/Firefox-Video2player/issues)
+  if a site misbehaves.
+## Install
+ 
+From [addons.mozilla.org](https://addons.mozilla.org/en-US/firefox/addon/video-opener-for-android/).
+Needs Firefox for Android 142+ or desktop Firefox 140+.
+ 
+## Development
+ 
+```bash
+npm ci
+npm run build       # dist/
+npm test            # unit tests
+npm run lint        # web-ext lint + privacy check
+npm run package     # artifacts/video2player-<version>.zip
+```
+ 
+On a phone (enable **Remote debugging via USB** in Firefox's developer
+settings first):
+ 
+```bash
+npm run fixture && npm run serve &
+adb reverse tcp:8422 tcp:8422
+npm run start:android   # then open http://localhost:8422/
+```
+ 
+The extension is bundled with esbuild from `src/`. The output in `dist/` is
+what ships; it is not minified. Node 20 or newer is required.
+ 
+## Credits and license
+ 
+The player engine (everything under `src/content/` apart from the pill in
+`controls/badge.*`, plus `src/lib/` and the popup) is adapted from
+**Nocturne Player** by Vlad Pohorilets,
+<https://github.com/kvachikk/nocturne-player>, licensed under MPL-2.0. See
+[NOTICE.md](NOTICE.md) for what was changed.
+ 
+Video2Player is released under the [MPL-2.0](LICENSE).
